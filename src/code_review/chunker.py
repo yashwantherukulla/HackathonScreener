@@ -42,7 +42,7 @@ class ChunkExtractor:
             
             document = FlatReader().load_data(file_path)
             
-            code_splitter = CodeSplitter(chunk_lines=100, language=language, max_chars=10000)
+            code_splitter = CodeSplitter(chunk_lines=100, language=language, max_chars=100000)
             nodes = code_splitter.get_nodes_from_documents(document)
             
             for node in nodes:
