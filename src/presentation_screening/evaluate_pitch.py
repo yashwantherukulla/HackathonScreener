@@ -1,11 +1,13 @@
 import os
 import json
 import time
+import mimetypes
+import magic
 import logging
 from collections import defaultdict
 from groq import Groq
 import instructor
-from ppt_eval_model import PresentationReviewModel
+#from ppt_eval_model import PresentationReviewModel
 from pptx import Presentation
 import requests
 from io import BytesIO
@@ -14,6 +16,7 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 
 class PresentationAnalyser:
+    base_path = "./data"
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
@@ -33,16 +36,38 @@ class PresentationAnalyser:
 
         return content
     
-    def save_file(self, file_url, download_dir):
+    def save_file(self, file_url, team_name, base_path="./data"):
         try:
+            # Define the base directory
+            base_dir = Path(base_path)
+            mime_type, _ = mimetypes.guess_type(file_url)
+            if not mime_type:
+                mime_type = magic.from_buffer(response.content, mime=True)
+            if mime_type == 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+                extension = '.pptx'
+            elif mime_type == 'application/vnd.apple.keynote':
+                extension = '.key'
+            else:
+                extension = ''
+            # Create the directory if it doesn't exist
+            team_dir = base_dir / team_name
+            team_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Define the file path
+            file_path = team_dir / f"ppt{extension}"
+            
+            # Download the file
             response = requests.get(file_url)
             response.raise_for_status()
-            with open(Path(download_dir + f"/{file_url.split("/")[-1]}"), 'wb') as f:
+            
+            # Save the file
+            with open(file_path, 'wb') as f:
                 f.write(response.content)
-            self.logger.info(f"File downloaded and saved to {download_dir}")
+            
+            self.logger.info(f"File downloaded and saved to {file_path}")
         except requests.RequestException as e:
             self.logger.error(f"Error downloading file from {file_url}: {str(e)}")
-        
+
 
     def getOutput(self, filePath: str):
         sys_prompt = """
