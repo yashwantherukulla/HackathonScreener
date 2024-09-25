@@ -8,7 +8,7 @@ of accepting and processing hackathon submissions.
 import logging
 from typing import Dict, Any
 from .data_validator import DataValidator
-from .storage_service import StorageService
+from storage_service import StorageService
 from typing import List
 
 logger = logging.getLogger(__name__)

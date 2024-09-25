@@ -82,7 +82,7 @@ class DataValidator:
         if 'name' not in file_data or 'content' not in file_data:
             logger.warning("Missing name or content in presentation file data")
             return False
-        if not any(f6ile_data['name'].lower().endswith(ext) for ext in allowed_extensions):
+        if not any(file_data['name'].lower().endswith(ext) for ext in allowed_extensions):
             logger.warning(f"Invalid presentation file type: {file_data['name']}")
             return False
         if len(file_data['content']) > 10 * 1024 * 1024:  # 10 MB limit
